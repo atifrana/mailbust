@@ -1,0 +1,9 @@
+{
+  "name": "mailbust-site",
+  "compatibility_date": "2025-09-01",
+  "assets": { "directory": "./web" },
+  "routes": [
+    { "pattern": "mailbust.com", "custom_domain": true },
+    { "pattern": "www.mailbust.com", "custom_domain": true }
+  ]
+}

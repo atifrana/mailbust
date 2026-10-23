@@ -30,7 +30,7 @@
     --green:#6ee7a0; --blue:#6cb6ff; --warn:#f2b45b;
     --sans:'Inter',system-ui,sans-serif;
     --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
-    --max:960px;
+    --max:1160px;
   }
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
@@ -50,11 +50,6 @@
   nav a:hover{color:var(--fg)}
   .gh{border:1px solid var(--line2);border-radius:8px;padding:7px 13px;color:var(--fg)}
   .gh:hover{border-color:var(--accent)}
-  .swatches{display:flex;gap:2px;align-items:center}
-  .sw{width:16px;height:16px;border-radius:50%;cursor:pointer;border:2px solid transparent;
-    background-clip:content-box;padding:6px;box-sizing:content-box}
-  .sw[aria-pressed="true"]{border-color:var(--fg)}
-
   .hero{text-align:center;padding:56px 0 18px}
   .badge{display:inline-flex;gap:8px;align-items:center;border:1px solid var(--line2);
     color:var(--dim);border-radius:999px;padding:5px 14px;font-size:12.5px;font-weight:500;
@@ -62,7 +57,7 @@
   .badge .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
   h1{font-size:clamp(33px,6vw,56px);line-height:1.06;margin:0 0 16px;font-weight:700;letter-spacing:-1.4px}
   h1 .em{color:var(--accent)}
-  .sub{color:var(--dim);font-size:clamp(16px,2.3vw,20px);max-width:600px;margin:0 auto 10px}
+  .sub{color:var(--dim);font-size:clamp(16px,2.3vw,20px);max-width:680px;margin:0 auto 10px}
   .domain{color:var(--faint);font-family:var(--mono);font-size:13.5px;margin:0 auto 28px}
   .domain b{color:var(--dim)}
   .cta{display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap}
@@ -80,7 +75,7 @@
     border-radius:9px;padding:12px 18px}
   .btn:hover{filter:brightness(1.08)}
 
-  .termwrap{margin:44px auto 0;max-width:720px}
+  .termwrap{margin:44px auto 0;max-width:940px}
   .term{background:var(--bg2);border:1px solid var(--line2);border-radius:14px;overflow:hidden;
     box-shadow:0 30px 80px -24px rgba(0,0,0,.7)}
   .term .bar{display:flex;align-items:center;gap:7px;padding:12px 15px;border-bottom:1px solid var(--line);background:#0a0c10}
@@ -152,12 +147,6 @@
       <a class="hide" href="#features">Features</a>
       <a class="hide" href="#usage">Usage</a>
       <a class="hide" href="#install">Install</a>
-      <div class="swatches" role="group" aria-label="Accent color">
-        <button class="sw" style="background:#4ade80" data-accent="#4ade80" data-dim="#2b9d57" aria-pressed="true" aria-label="Green" title="Green"></button>
-        <button class="sw" style="background:#22d3ee" data-accent="#22d3ee" data-dim="#138da3" aria-pressed="false" aria-label="Cyan" title="Cyan"></button>
-        <button class="sw" style="background:#f59e0b" data-accent="#f59e0b" data-dim="#b06f08" aria-pressed="false" aria-label="Amber" title="Amber"></button>
-        <button class="sw" style="background:#6cb6ff" data-accent="#6cb6ff" data-dim="#3d7fc4" aria-pressed="false" aria-label="Blue" title="Blue"></button>
-      </div>
       <a class="gh" href="https://github.com/atifrana/mailbust">GitHub</a>
     </nav>
   </header>
@@ -266,14 +255,6 @@
     var done=function(){btn.textContent='copied';setTimeout(function(){btn.textContent='copy'},1400)};
     if(navigator.clipboard){navigator.clipboard.writeText(t).then(done,function(){})}else{done()}
   }
-  var root=document.documentElement;
-  document.querySelectorAll('.sw').forEach(function(b){
-    b.addEventListener('click',function(){
-      root.style.setProperty('--accent',b.dataset.accent);
-      root.style.setProperty('--accent-dim',b.dataset.dim);
-      document.querySelectorAll('.sw').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});
-    });
-  });
   var term=document.getElementById('term');
   var io=new IntersectionObserver(function(es){
     es.forEach(function(e){if(e.isIntersecting){term.classList.add('play');io.disconnect()}});
