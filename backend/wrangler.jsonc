@@ -1,0 +1,37 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "mailbust",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+
+  "routes": [
+    { "pattern": "api.mailbust.com", "custom_domain": true }
+  ],
+
+  "vars": {
+    "MAILBUST_DOMAIN": "mailbust.com",
+    "DEFAULT_TTL_SECONDS": "900",
+    "MAX_TTL_SECONDS": "86400",
+    "MAX_MESSAGE_BYTES": "10485760",
+    "MAX_MESSAGES": "100"
+  },
+
+  "durable_objects": {
+    "bindings": [{ "name": "MAILBOX", "class_name": "MailboxDO" }]
+  },
+
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["MailboxDO"] }
+  ],
+
+  "r2_buckets": [
+    { "binding": "ATTACHMENTS", "bucket_name": "mailbust-attachments" }
+  ],
+
+  "ratelimits": [
+    { "name": "RL_CREATE", "namespace_id": "1001", "simple": { "limit": 20, "period": 60 } },
+    { "name": "RL_WAIT", "namespace_id": "1002", "simple": { "limit": 120, "period": 60 } }
+  ]
+}
