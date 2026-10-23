@@ -1,0 +1,87 @@
+# GoReleaser configuration for the MailBust CLI.
+# Docs: https://goreleaser.com  |  validate locally with: goreleaser check
+version: 2
+
+project_name: mailbust
+
+builds:
+  - id: mailbust
+    dir: cli # the CLI is its own Go module in ./cli
+    main: .
+    binary: mailbust
+    env:
+      - CGO_ENABLED=0
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    ldflags:
+      - -s -w -X main.Version={{ .Version }}
+    mod_timestamp: "{{ .CommitTimestamp }}"
+
+archives:
+  - id: default
+    ids: [mailbust]
+    name_template: "mailbust_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    files:
+      - README.md
+      - LICENSE
+
+checksum:
+  name_template: "checksums.txt"
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-dev"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+
+# --- Package managers --------------------------------------------------------
+# These push to SEPARATE repos and need a PAT in the TAP_GITHUB_TOKEN secret with
+# write access to them. One-time setup (see docs/RELEASING.md):
+#   - create repo  atifrana/homebrew-tap
+#   - create repo  atifrana/scoop-bucket
+# Until those exist + the secret is set, comment these two blocks out for the
+# first release (binaries + GitHub Release still publish fine without them).
+
+# Re-enable these once atifrana/homebrew-tap and atifrana/scoop-bucket exist and
+# the TAP_GITHUB_TOKEN secret is set (see docs/RELEASING.md).
+# homebrew_casks:
+#   - name: mailbust
+#     ids: [default]
+#     repository:
+#       owner: atifrana
+#       name: homebrew-tap
+#       token: "{{ .Env.TAP_GITHUB_TOKEN }}"
+#     homepage: "https://github.com/atifrana/mailbust"
+#     description: "A terminal-first disposable mailbox"
+#     hooks:
+#       post:
+#         install: |
+#           if OS.mac?
+#             system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/mailbust"]
+#           end
+#
+# scoops:
+#   - name: mailbust
+#     ids: [default]
+#     repository:
+#       owner: atifrana
+#       name: scoop-bucket
+#       token: "{{ .Env.TAP_GITHUB_TOKEN }}"
+#     homepage: "https://github.com/atifrana/mailbust"
+#     description: "A terminal-first disposable mailbox"
+#     license: "MIT"
+
+release:
+  github:
+    owner: atifrana
+    name: mailbust
+  draft: false
+  prerelease: auto

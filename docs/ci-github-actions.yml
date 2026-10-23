@@ -1,0 +1,37 @@
+# Example: use MailBust to receive a verification code during an end-to-end test.
+# Copy this into .github/workflows/ and adapt the "signup"/"verify" steps to your app.
+name: e2e-email-verification
+
+on:
+  workflow_dispatch:
+
+jobs:
+  signup-flow:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install mailbust
+        run: |
+          os=$(uname -s | tr '[:upper:]' '[:lower:]')
+          arch=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
+          curl -sSL -o mailbust \
+            "https://github.com/atifrana/mailbust/releases/latest/download/mailbust_${os}_${arch}"
+          chmod +x mailbust
+          sudo mv mailbust /usr/local/bin/mailbust
+
+      - name: Pick a unique disposable mailbox
+        id: mb
+        run: echo "addr=ci-${GITHUB_RUN_ID}@mailbust.com" >> "$GITHUB_OUTPUT"
+
+      - name: Trigger signup in the app under test
+        run: ./scripts/signup.sh "${{ steps.mb.outputs.addr }}"
+
+      - name: Wait for the verification code
+        id: code
+        run: |
+          code=$(mailbust "${{ steps.mb.outputs.addr }}" --code --timeout 120)
+          echo "value=$code" >> "$GITHUB_OUTPUT"
+
+      - name: Complete verification
+        run: ./scripts/verify.sh "${{ steps.code.outputs.value }}"

@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MailBust - disposable email in your terminal</title>
+<meta name="description" content="A terminal-first disposable mailbox. One command opens a live inbox, codes are extracted for you, and it self-destructs in 15 minutes." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#08090c; --bg2:#0d0f14; --panel:#0f1218; --line:#1c212b; --line2:#272e3a;
+    --fg:#eceef3; --dim:#8b93a3; --faint:#5b6270;
+    --accent:#c9a2ff; --accent2:#a06bff; --green:#6ee7a0; --blue:#6cb6ff; --warn:#f2b45b;
+    --sans:'Inter',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+    --max:960px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);
+    line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background:radial-gradient(900px 500px at 50% -8%,rgba(160,107,255,.12),transparent 70%)}
+  .wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
+  a{color:inherit}
+  code,.mono{font-family:var(--mono)}
+
+  header{display:flex;align-items:center;justify-content:space-between;padding:22px 0}
+  .logo{font-family:var(--mono);font-weight:700;font-size:17px;letter-spacing:.3px}
+  .logo b{color:var(--accent)}
+  nav a{color:var(--dim);text-decoration:none;margin-left:24px;font-size:14px;font-weight:500}
+  nav a:hover{color:var(--fg)}
+  .gh{border:1px solid var(--line2);border-radius:8px;padding:7px 13px !important;color:var(--fg)}
+  .gh:hover{border-color:var(--accent)}
+
+  .hero{text-align:center;padding:60px 0 20px}
+  .badge{display:inline-flex;gap:8px;align-items:center;border:1px solid var(--line2);
+    color:var(--dim);border-radius:999px;padding:5px 14px;font-size:12.5px;font-weight:500;
+    font-family:var(--mono);margin-bottom:26px}
+  .badge .dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+  h1{font-size:clamp(34px,6vw,58px);line-height:1.05;margin:0 0 18px;font-weight:700;letter-spacing:-1.5px}
+  h1 .em{background:linear-gradient(120deg,var(--accent),var(--blue));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:var(--dim);font-size:clamp(16px,2.4vw,20px);max-width:600px;margin:0 auto 32px}
+  .cta{display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap}
+  .install{display:inline-flex;align-items:center;gap:14px;background:var(--panel);
+    border:1px solid var(--line2);border-radius:10px;padding:13px 16px;font-family:var(--mono);font-size:15px}
+  .install .pr{color:var(--accent)}
+  .cpy{background:transparent;border:1px solid var(--line2);color:var(--dim);border-radius:6px;
+    padding:4px 10px;font:inherit;font-size:12px;cursor:pointer;transition:.15s}
+  .cpy:hover{color:var(--fg);border-color:var(--accent)}
+  .ghost{color:var(--dim);text-decoration:none;font-size:14px;font-weight:500;padding:13px 4px}
+  .ghost:hover{color:var(--fg)}
+
+  /* terminal */
+  .termwrap{margin:46px auto 0;max-width:720px}
+  .term{background:var(--bg2);border:1px solid var(--line2);border-radius:14px;overflow:hidden;
+    box-shadow:0 30px 80px -20px rgba(0,0,0,.7),0 0 0 1px rgba(201,162,255,.06)}
+  .term .bar{display:flex;align-items:center;gap:7px;padding:12px 15px;border-bottom:1px solid var(--line);background:#0a0c10}
+  .d{width:11px;height:11px;border-radius:50%}.d.r{background:#ff5f56}.d.y{background:#ffbd2e}.d.g{background:#27c93f}
+  .bar .ttl{margin-left:10px;color:var(--faint);font-family:var(--mono);font-size:12px}
+  .scr{padding:16px 18px;font-family:var(--mono);font-size:13.5px;min-height:286px}
+  .prompt{color:var(--green)} .typed{color:var(--fg)} .caret{color:var(--accent);animation:blink 1s step-end infinite}
+  @keyframes blink{50%{opacity:0}}
+  .inbox{opacity:0}
+  .ih{display:flex;justify-content:space-between;color:var(--dim);border-bottom:1px solid var(--line);
+    padding:8px 0 10px;margin:8px 0 8px}
+  .pub{color:#1c130a;background:var(--warn);font-weight:700;border-radius:4px;padding:1px 7px;font-size:11px;margin-left:6px}
+  .row{display:grid;grid-template-columns:16px 120px 1fr 86px 66px;gap:10px;padding:5px 0;align-items:center;opacity:0}
+  .row .snd{color:var(--fg)} .row .sj{color:var(--dim)} .t{color:var(--faint)}
+  .cd{color:var(--green);font-weight:700}.lk{color:var(--blue)}
+  .row.sel{background:rgba(201,162,255,.08);border-radius:6px}
+  .row.sel .arr{color:var(--accent)} .row.sel .snd{color:var(--accent)} .row.sel .sj{color:var(--fg)}
+  .row.fresh .snd{color:var(--accent)}
+  .ihelp{color:var(--faint);border-top:1px solid var(--line);margin-top:10px;padding-top:10px;font-size:12px}
+
+  @keyframes fade{to{opacity:1}}
+  @keyframes slidein{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+  .play .inbox{animation:fade .3s .9s forwards}
+  .play .r1{animation:fade .25s 1.2s forwards}
+  .play .r2{animation:fade .25s 1.45s forwards}
+  .play .r3{animation:fade .25s 1.7s forwards}
+  .play .rnew{animation:slidein .45s 3.2s forwards}
+  .play .typed{animation:type 1s steps(22) .1s both}
+  .play .caret{animation:blink 1s step-end infinite}
+
+  /* sections */
+  section{padding:56px 0}
+  .eyebrow{font-family:var(--mono);color:var(--accent);font-size:12.5px;font-weight:500;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;text-align:center}
+  h2{font-size:clamp(24px,4vw,32px);font-weight:700;letter-spacing:-.8px;text-align:center;margin:0 0 42px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px}
+  .card:hover{border-color:var(--line2)}
+  .card .ic{font-size:20px;margin-bottom:12px}
+  .card h3{margin:0 0 8px;font-size:16px;font-weight:600}
+  .card p{margin:0;color:var(--dim);font-size:14px}
+  .card code{color:var(--accent);background:rgba(201,162,255,.1);padding:1px 5px;border-radius:4px;font-size:12.5px}
+
+  .ways{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  .way{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .way .hd{padding:14px 18px;border-bottom:1px solid var(--line);font-weight:600;font-size:15px;display:flex;align-items:center;gap:8px}
+  .way pre{margin:0;padding:16px 18px;font-family:var(--mono);font-size:12.5px;color:var(--dim);line-height:1.8;overflow-x:auto}
+  .way pre .pr{color:var(--green)} .way pre .o{color:var(--accent)}
+
+  .flow{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;
+    font-family:var(--mono);font-size:13px;color:var(--dim)}
+  .flow .n{background:var(--panel);border:1px solid var(--line2);border-radius:10px;padding:12px 16px;color:var(--fg)}
+  .flow .n small{display:block;color:var(--faint);font-size:11px;margin-top:2px}
+  .flow .ar{color:var(--accent)}
+
+  footer{border-top:1px solid var(--line);margin-top:30px;padding:30px 0 60px;
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;color:var(--faint);font-size:13px}
+  footer a{color:var(--dim);text-decoration:none;margin-left:18px}
+  footer a:hover{color:var(--fg)}
+  footer .l{font-family:var(--mono)}
+
+  @media(max-width:720px){
+    nav a:not(.gh){display:none}
+    .grid3,.ways{grid-template-columns:1fr}
+    .row{grid-template-columns:14px 84px 1fr 60px}.row .t{display:none}
+    .flow{flex-direction:column}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo"><b>mail</b>bust</div>
+    <nav>
+      <a href="#features">Features</a>
+      <a href="#ways">Usage</a>
+      <a href="#install">Install</a>
+      <a class="gh" href="https://github.com/atifrana/mailbust">GitHub ↗</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="badge"><span class="dot"></span> receive-only · no sign-up · open source</div>
+    <h1>Disposable email,<br>live in your <span class="em">terminal</span>.</h1>
+    <p class="sub">One command opens a throwaway inbox. Mail lands instantly, verification
+      codes are pulled out for you, and it vanishes in 15 minutes.</p>
+    <div class="cta">
+      <div class="install">
+        <span><span class="pr">$</span> <span id="icmd">brew install atifrana/tap/mailbust</span></span>
+        <button class="cpy" onclick="cpy(this)">copy</button>
+      </div>
+      <a class="ghost" href="#install">other ways ↓</a>
+    </div>
+
+    <div class="termwrap">
+      <div class="term" id="term">
+        <div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span>
+          <span class="ttl">mailbust - ~/project</span></div>
+        <div class="scr">
+          <div><span class="prompt">$</span> <span class="typed">mailbust testing</span><span class="caret">▋</span></div>
+          <div class="inbox">
+            <div class="ih"><span>testing@mailbust.com <span class="pub">PUBLIC</span></span><span>⏱ 14:58 left</span></div>
+            <div class="row sel r1"><span class="arr">▸</span><span class="snd">Netflix</span><span class="sj">Verify your email</span><span class="cd">482913</span><span class="t">just now</span></div>
+            <div class="row r2"><span></span><span class="snd">GitHub</span><span class="sj">Confirm your account</span><span class="lk">[link]</span><span class="t">1 min ago</span></div>
+            <div class="row r3"><span></span><span class="snd">Stripe</span><span class="sj">Your one-time passcode</span><span class="cd">550182</span><span class="t">2 min ago</span></div>
+            <div class="row rnew fresh"><span></span><span class="snd">Slack</span><span class="sj">Your confirmation code</span><span class="cd">824193</span><span class="t">just now</span></div>
+            <div class="ihelp">↑↓ move · enter open · c copy code · l copy link · e extend · q quit</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="eyebrow">Why it's nice</div>
+    <h2>Fast, honest, and out of your way</h2>
+    <div class="grid3">
+      <div class="card"><div class="ic">⚡</div><h3>Instantly live</h3><p>Mail streams in over WebSocket - no refreshing. The code appears right in the list, so you rarely open an email.</p></div>
+      <div class="card"><div class="ic">🎯</div><h3>Codes extracted</h3><p>It finds the real verification code or magic link and ignores order numbers, prices, dates and years. Backed by 84 tests.</p></div>
+      <div class="card"><div class="ic">🤖</div><h3>Scripts &amp; agents</h3><p><code>--code</code>, <code>--json</code> and real exit codes for CI - plus an MCP server so AI agents can grab codes themselves.</p></div>
+    </div>
+  </section>
+
+  <section id="ways">
+    <div class="eyebrow">Three ways in</div>
+    <h2>Humans, scripts, and agents</h2>
+    <div class="ways">
+      <div class="way"><div class="hd">🖥️ Interactive</div><pre><span class="pr">$</span> mailbust
+<span class="pr">$</span> mailbust testing
+<span class="pr">$</span> mailbust testing <span class="o">-t 1h</span></pre></div>
+      <div class="way"><div class="hd">⚙️ Scripting / CI</div><pre><span class="pr">$</span> mailbust --new <span class="o">--json</span>
+<span class="pr">$</span> mailbust box <span class="o">--code</span>
+<span class="pr">$</span> mailbust box <span class="o">--list --json</span></pre></div>
+      <div class="way"><div class="hd">🧠 MCP (agents)</div><pre><span class="pr">$</span> mailbust mcp
+
+<span style="color:var(--faint)"># create_mailbox
+# wait_for_code …</span></pre></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">Under the hood</div>
+    <h2>Serverless, on Cloudflare</h2>
+    <div class="flow">
+      <span class="n">Email in<small>catch-all routing</small></span>
+      <span class="ar">→</span>
+      <span class="n">Worker<small>parse · extract</small></span>
+      <span class="ar">→</span>
+      <span class="n">Durable Object<small>one per mailbox</small></span>
+      <span class="ar">→</span>
+      <span class="n">Auto-delete<small>on expiry</small></span>
+    </div>
+  </section>
+
+  <section id="install">
+    <div class="eyebrow">Install</div>
+    <h2>One line, any platform</h2>
+    <div class="ways">
+      <div class="way"><div class="hd">macOS / Linux</div><pre>curl -sSL mailbust.com/install.sh | sh</pre></div>
+      <div class="way"><div class="hd">Windows</div><pre>irm mailbust.com/install.ps1 | iex</pre></div>
+      <div class="way"><div class="hd">Homebrew / Scoop / Go</div><pre>brew install atifrana/tap/mailbust
+scoop install mailbust
+go install …/mailbust.com/cli@latest</pre></div>
+    </div>
+  </section>
+
+  <footer>
+    <span class="l">© 2026 MailBust · MIT · built on Cloudflare</span>
+    <span>
+      <a href="https://github.com/atifrana/mailbust">GitHub</a>
+      <a href="/privacy">Privacy</a>
+      <a href="/terms">Terms</a>
+    </span>
+  </footer>
+</div>
+
+<script>
+  function cpy(btn){
+    var t=document.getElementById('icmd').textContent;
+    (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(
+      function(){btn.textContent='copied';setTimeout(function(){btn.textContent='copy'},1400)},
+      function(){btn.textContent='copy'}
+    );
+  }
+  // play the terminal animation once it scrolls into view
+  var term=document.getElementById('term');
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(e.isIntersecting){ term.classList.add('play'); io.disconnect(); }});
+  },{threshold:.4});
+  io.observe(term);
+</script>
+</body>
+</html>

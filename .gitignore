@@ -1,0 +1,26 @@
+# Secrets
+.dev.vars
+.dev.vars.*
+*.env
+.env*
+
+# Dependencies
+node_modules/
+cli/vendor/
+
+# Build output
+dist/
+.wrangler/
+cli/bin/
+cli/dist/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/
+
+# Internal planning docs (kept local, not published)
+CLAUDE.md
+PROGRESS.md
