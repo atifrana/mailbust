@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" font-family="'JetBrains Mono','DejaVu Sans Mono',monospace">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="0%" r="75%">
+      <stop offset="0%" stop-color="#113222"/>
+      <stop offset="60%" stop-color="#08090c"/>
+      <stop offset="100%" stop-color="#08090c"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#08090c"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+
+  <text x="80" y="118" font-size="30" font-weight="700" fill="#eceef3"><tspan fill="#4ade80">mail</tspan>bust</text>
+
+  <text x="80" y="268" font-size="70" font-weight="700" fill="#eceef3" font-family="'Inter','DejaVu Sans',sans-serif">Disposable email,</text>
+  <text x="80" y="348" font-size="70" font-weight="700" font-family="'Inter','DejaVu Sans',sans-serif"><tspan fill="#eceef3">live in your </tspan><tspan fill="#4ade80">terminal.</tspan></text>
+
+  <text x="82" y="418" font-size="27" fill="#8b93a3" font-family="'Inter','DejaVu Sans',sans-serif">One command, a throwaway @mailbust.com inbox. Codes pulled out for you.</text>
+
+  <g transform="translate(80,470)">
+    <rect width="560" height="92" rx="12" fill="#0f1218" stroke="#272e3a"/>
+    <text x="24" y="56" font-size="25"><tspan fill="#4ade80">$</tspan><tspan fill="#eceef3"> mailbust testing</tspan></text>
+  </g>
+
+  <g transform="translate(700,470)" font-size="24">
+    <rect width="420" height="92" rx="12" fill="#0d0f14" stroke="#272e3a"/>
+    <text x="24" y="42" fill="#eceef3">Netflix  <tspan fill="#6ee7a0" font-weight="700">482913</tspan></text>
+    <text x="24" y="74" fill="#8b93a3">GitHub   <tspan fill="#6cb6ff">[link]</tspan></text>
+  </g>
+
+  <text x="1120" y="118" font-size="22" fill="#5b6270" text-anchor="end" font-family="'Inter','DejaVu Sans',sans-serif">github.com/atifrana/mailbust</text>
+</svg>

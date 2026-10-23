@@ -4,75 +4,102 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>MailBust - disposable email in your terminal</title>
-<meta name="description" content="A terminal-first disposable mailbox. One command opens a live inbox, codes are extracted for you, and it self-destructs in 15 minutes." />
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<meta name="description" content="A disposable email inbox that lives in your terminal. One command gives you a throwaway @mailbust.com address, shows mail as it arrives, pulls out the verification code, and deletes itself after 15 minutes." />
+<link rel="canonical" href="https://mailbust.com/" />
+<meta name="theme-color" content="#08090c" />
+<meta property="og:title" content="MailBust" />
+<meta property="og:description" content="Disposable email that lives in your terminal. Codes pulled out for you. Gone in 15 minutes." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://mailbust.com/" />
+<meta property="og:image" content="https://mailbust.com/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="MailBust" />
+<meta name="twitter:description" content="Disposable email that lives in your terminal. Codes pulled out for you. Gone in 15 minutes." />
+<meta name="twitter:image" content="https://mailbust.com/og.png" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d0f14'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='18' font-weight='700' fill='%234ade80' text-anchor='middle'%3Em%3C/text%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
 <style>
   :root{
-    --bg:#08090c; --bg2:#0d0f14; --panel:#0f1218; --line:#1c212b; --line2:#272e3a;
+    --bg:#08090c; --bg2:#0d0f14; --panel:#0f1218; --line:#1b2029; --line2:#272e3a;
     --fg:#eceef3; --dim:#8b93a3; --faint:#5b6270;
-    --accent:#c9a2ff; --accent2:#a06bff; --green:#6ee7a0; --blue:#6cb6ff; --warn:#f2b45b;
-    --sans:'Inter',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+    --accent:#4ade80; --accent-dim:#2b9d57;
+    --green:#6ee7a0; --blue:#6cb6ff; --warn:#f2b45b;
+    --sans:'Inter',system-ui,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
     --max:960px;
   }
   *{box-sizing:border-box}
   html{scroll-behavior:smooth}
   body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);
-    line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+    line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
   body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
-    background:radial-gradient(900px 500px at 50% -8%,rgba(160,107,255,.12),transparent 70%)}
+    background:radial-gradient(820px 460px at 50% -6%,color-mix(in srgb,var(--accent) 14%,transparent),transparent 70%)}
   .wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
   a{color:inherit}
   code,.mono{font-family:var(--mono)}
 
-  header{display:flex;align-items:center;justify-content:space-between;padding:22px 0}
+  header{display:flex;align-items:center;justify-content:space-between;padding:20px 0;gap:16px;flex-wrap:wrap}
   .logo{font-family:var(--mono);font-weight:700;font-size:17px;letter-spacing:.3px}
   .logo b{color:var(--accent)}
-  nav a{color:var(--dim);text-decoration:none;margin-left:24px;font-size:14px;font-weight:500}
+  nav{display:flex;align-items:center;gap:22px}
+  nav a{color:var(--dim);text-decoration:none;font-size:14px;font-weight:500}
   nav a:hover{color:var(--fg)}
-  .gh{border:1px solid var(--line2);border-radius:8px;padding:7px 13px !important;color:var(--fg)}
+  .gh{border:1px solid var(--line2);border-radius:8px;padding:7px 13px;color:var(--fg)}
   .gh:hover{border-color:var(--accent)}
+  .swatches{display:flex;gap:2px;align-items:center}
+  .sw{width:16px;height:16px;border-radius:50%;cursor:pointer;border:2px solid transparent;
+    background-clip:content-box;padding:6px;box-sizing:content-box}
+  .sw[aria-pressed="true"]{border-color:var(--fg)}
 
-  .hero{text-align:center;padding:60px 0 20px}
+  .hero{text-align:center;padding:56px 0 18px}
   .badge{display:inline-flex;gap:8px;align-items:center;border:1px solid var(--line2);
     color:var(--dim);border-radius:999px;padding:5px 14px;font-size:12.5px;font-weight:500;
-    font-family:var(--mono);margin-bottom:26px}
-  .badge .dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
-  h1{font-size:clamp(34px,6vw,58px);line-height:1.05;margin:0 0 18px;font-weight:700;letter-spacing:-1.5px}
-  h1 .em{background:linear-gradient(120deg,var(--accent),var(--blue));-webkit-background-clip:text;background-clip:text;color:transparent}
-  .sub{color:var(--dim);font-size:clamp(16px,2.4vw,20px);max-width:600px;margin:0 auto 32px}
+    font-family:var(--mono);margin-bottom:24px}
+  .badge .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+  h1{font-size:clamp(33px,6vw,56px);line-height:1.06;margin:0 0 16px;font-weight:700;letter-spacing:-1.4px}
+  h1 .em{color:var(--accent)}
+  .sub{color:var(--dim);font-size:clamp(16px,2.3vw,20px);max-width:600px;margin:0 auto 10px}
+  .domain{color:var(--faint);font-family:var(--mono);font-size:13.5px;margin:0 auto 28px}
+  .domain b{color:var(--dim)}
   .cta{display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap}
   .install{display:inline-flex;align-items:center;gap:14px;background:var(--panel);
-    border:1px solid var(--line2);border-radius:10px;padding:13px 16px;font-family:var(--mono);font-size:15px}
+    border:1px solid var(--line2);border-radius:10px;padding:12px 16px;font-family:var(--mono);font-size:14.5px;
+    max-width:100%}
+  .install>span:first-child{overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+  .install>span:first-child::-webkit-scrollbar{display:none}
   .install .pr{color:var(--accent)}
+  .cpy{flex:none}
   .cpy{background:transparent;border:1px solid var(--line2);color:var(--dim);border-radius:6px;
     padding:4px 10px;font:inherit;font-size:12px;cursor:pointer;transition:.15s}
   .cpy:hover{color:var(--fg);border-color:var(--accent)}
-  .ghost{color:var(--dim);text-decoration:none;font-size:14px;font-weight:500;padding:13px 4px}
-  .ghost:hover{color:var(--fg)}
+  .btn{background:var(--accent);color:#06240f;text-decoration:none;font-weight:600;font-size:14.5px;
+    border-radius:9px;padding:12px 18px}
+  .btn:hover{filter:brightness(1.08)}
 
-  /* terminal */
-  .termwrap{margin:46px auto 0;max-width:720px}
+  .termwrap{margin:44px auto 0;max-width:720px}
   .term{background:var(--bg2);border:1px solid var(--line2);border-radius:14px;overflow:hidden;
-    box-shadow:0 30px 80px -20px rgba(0,0,0,.7),0 0 0 1px rgba(201,162,255,.06)}
+    box-shadow:0 30px 80px -24px rgba(0,0,0,.7)}
   .term .bar{display:flex;align-items:center;gap:7px;padding:12px 15px;border-bottom:1px solid var(--line);background:#0a0c10}
   .d{width:11px;height:11px;border-radius:50%}.d.r{background:#ff5f56}.d.y{background:#ffbd2e}.d.g{background:#27c93f}
   .bar .ttl{margin-left:10px;color:var(--faint);font-family:var(--mono);font-size:12px}
-  .scr{padding:16px 18px;font-family:var(--mono);font-size:13.5px;min-height:286px}
-  .prompt{color:var(--green)} .typed{color:var(--fg)} .caret{color:var(--accent);animation:blink 1s step-end infinite}
+  .scr{padding:15px 17px;font-family:var(--mono);font-size:13px}
+  .prompt{color:var(--accent)} .typed{color:var(--fg)} .caret{color:var(--accent);animation:blink 1s step-end infinite}
   @keyframes blink{50%{opacity:0}}
   .inbox{opacity:0}
   .ih{display:flex;justify-content:space-between;color:var(--dim);border-bottom:1px solid var(--line);
-    padding:8px 0 10px;margin:8px 0 8px}
+    padding:8px 0 9px;margin:8px 0 7px}
   .pub{color:#1c130a;background:var(--warn);font-weight:700;border-radius:4px;padding:1px 7px;font-size:11px;margin-left:6px}
-  .row{display:grid;grid-template-columns:16px 120px 1fr 86px 66px;gap:10px;padding:5px 0;align-items:center;opacity:0}
-  .row .snd{color:var(--fg)} .row .sj{color:var(--dim)} .t{color:var(--faint)}
+  .row{display:grid;grid-template-columns:16px 118px 1fr 82px 62px;gap:9px;padding:4px 0;align-items:center;opacity:0}
+  .row .snd{color:var(--fg)} .row .sj{color:var(--dim)} .tm{color:var(--faint)}
   .cd{color:var(--green);font-weight:700}.lk{color:var(--blue)}
-  .row.sel{background:rgba(201,162,255,.08);border-radius:6px}
-  .row.sel .arr{color:var(--accent)} .row.sel .snd{color:var(--accent)} .row.sel .sj{color:var(--fg)}
-  .row.fresh .snd{color:var(--accent)}
-  .ihelp{color:var(--faint);border-top:1px solid var(--line);margin-top:10px;padding-top:10px;font-size:12px}
+  .row.sel{background:color-mix(in srgb,var(--accent) 9%,transparent);border-radius:6px}
+  .row.sel .arr,.row.sel .snd{color:var(--accent)} .row.sel .sj{color:var(--fg)}
+  .keybar{color:var(--faint);border-top:1px solid var(--line);margin-top:9px;padding-top:9px;font-size:11.5px;line-height:1.9}
+  .keybar b{color:var(--accent);font-weight:700}
 
   @keyframes fade{to{opacity:1}}
   @keyframes slidein{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
@@ -80,45 +107,40 @@
   .play .r1{animation:fade .25s 1.2s forwards}
   .play .r2{animation:fade .25s 1.45s forwards}
   .play .r3{animation:fade .25s 1.7s forwards}
-  .play .rnew{animation:slidein .45s 3.2s forwards}
-  .play .typed{animation:type 1s steps(22) .1s both}
-  .play .caret{animation:blink 1s step-end infinite}
+  .play .rnew{animation:slidein .45s 3.1s forwards}
 
-  /* sections */
-  section{padding:56px 0}
-  .eyebrow{font-family:var(--mono);color:var(--accent);font-size:12.5px;font-weight:500;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;text-align:center}
-  h2{font-size:clamp(24px,4vw,32px);font-weight:700;letter-spacing:-.8px;text-align:center;margin:0 0 42px}
+  section{padding:54px 0}
+  .eyebrow{font-family:var(--mono);color:var(--accent);font-size:12px;font-weight:500;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;text-align:center}
+  h2{font-size:clamp(23px,4vw,31px);font-weight:700;letter-spacing:-.7px;text-align:center;margin:0 0 40px}
   .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px}
   .card:hover{border-color:var(--line2)}
-  .card .ic{font-size:20px;margin-bottom:12px}
-  .card h3{margin:0 0 8px;font-size:16px;font-weight:600}
+  .card .ic{font-size:19px;margin-bottom:11px}
+  .card h3{margin:0 0 7px;font-size:16px;font-weight:600}
   .card p{margin:0;color:var(--dim);font-size:14px}
-  .card code{color:var(--accent);background:rgba(201,162,255,.1);padding:1px 5px;border-radius:4px;font-size:12.5px}
+  .card code{color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);padding:1px 5px;border-radius:4px;font-size:12.5px}
 
   .ways{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
   .way{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-  .way .hd{padding:14px 18px;border-bottom:1px solid var(--line);font-weight:600;font-size:15px;display:flex;align-items:center;gap:8px}
-  .way pre{margin:0;padding:16px 18px;font-family:var(--mono);font-size:12.5px;color:var(--dim);line-height:1.8;overflow-x:auto}
-  .way pre .pr{color:var(--green)} .way pre .o{color:var(--accent)}
+  .way .hd{padding:13px 18px;border-bottom:1px solid var(--line);font-weight:600;font-size:15px}
+  .way pre{margin:0;padding:15px 18px;font-family:var(--mono);font-size:12.5px;color:var(--dim);line-height:1.85;overflow-x:auto}
+  .way pre .pr{color:var(--accent)} .way pre .o{color:var(--green)} .way pre .c{color:var(--faint)}
 
-  .flow{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;
-    font-family:var(--mono);font-size:13px;color:var(--dim)}
-  .flow .n{background:var(--panel);border:1px solid var(--line2);border-radius:10px;padding:12px 16px;color:var(--fg)}
-  .flow .n small{display:block;color:var(--faint);font-size:11px;margin-top:2px}
-  .flow .ar{color:var(--accent)}
+  .flow{display:flex;align-items:stretch;justify-content:center;gap:10px;flex-wrap:wrap;font-family:var(--mono);font-size:13px}
+  .flow .n{background:var(--panel);border:1px solid var(--line2);border-radius:10px;padding:12px 15px;color:var(--fg);text-align:center}
+  .flow .n small{display:block;color:var(--faint);font-size:11px;margin-top:3px}
+  .flow .ar{color:var(--accent);align-self:center}
 
-  footer{border-top:1px solid var(--line);margin-top:30px;padding:30px 0 60px;
+  footer{border-top:1px solid var(--line);margin-top:28px;padding:28px 0 56px;
     display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;color:var(--faint);font-size:13px}
-  footer a{color:var(--dim);text-decoration:none;margin-left:18px}
-  footer a:hover{color:var(--fg)}
   footer .l{font-family:var(--mono)}
+  footer nav a{margin-left:18px}
 
   @media(max-width:720px){
-    nav a:not(.gh){display:none}
+    nav .hide{display:none}
     .grid3,.ways{grid-template-columns:1fr}
-    .row{grid-template-columns:14px 84px 1fr 60px}.row .t{display:none}
-    .flow{flex-direction:column}
+    .row{grid-template-columns:14px 80px 1fr 56px}.row .tm{display:none}
+    .flow{flex-direction:column}.flow .ar{transform:rotate(90deg)}
   }
 </style>
 </head>
@@ -127,39 +149,46 @@
   <header>
     <div class="logo"><b>mail</b>bust</div>
     <nav>
-      <a href="#features">Features</a>
-      <a href="#ways">Usage</a>
-      <a href="#install">Install</a>
-      <a class="gh" href="https://github.com/atifrana/mailbust">GitHub ↗</a>
+      <a class="hide" href="#features">Features</a>
+      <a class="hide" href="#usage">Usage</a>
+      <a class="hide" href="#install">Install</a>
+      <div class="swatches" role="group" aria-label="Accent color">
+        <button class="sw" style="background:#4ade80" data-accent="#4ade80" data-dim="#2b9d57" aria-pressed="true" aria-label="Green" title="Green"></button>
+        <button class="sw" style="background:#22d3ee" data-accent="#22d3ee" data-dim="#138da3" aria-pressed="false" aria-label="Cyan" title="Cyan"></button>
+        <button class="sw" style="background:#f59e0b" data-accent="#f59e0b" data-dim="#b06f08" aria-pressed="false" aria-label="Amber" title="Amber"></button>
+        <button class="sw" style="background:#6cb6ff" data-accent="#6cb6ff" data-dim="#3d7fc4" aria-pressed="false" aria-label="Blue" title="Blue"></button>
+      </div>
+      <a class="gh" href="https://github.com/atifrana/mailbust">GitHub</a>
     </nav>
   </header>
 
   <section class="hero">
-    <div class="badge"><span class="dot"></span> receive-only · no sign-up · open source</div>
+    <div class="badge"><span class="dot"></span> receive-only &middot; no sign-up &middot; open source</div>
     <h1>Disposable email,<br>live in your <span class="em">terminal</span>.</h1>
-    <p class="sub">One command opens a throwaway inbox. Mail lands instantly, verification
-      codes are pulled out for you, and it vanishes in 15 minutes.</p>
+    <p class="sub">Run one command and you get a throwaway inbox. Mail shows up as it
+      arrives, the verification code is pulled out for you, and it's gone in 15 minutes.</p>
+    <p class="domain">every inbox is an address on <b>mailbust.com</b> &nbsp;&middot;&nbsp; open a name, get <b>name@mailbust.com</b></p>
     <div class="cta">
       <div class="install">
-        <span><span class="pr">$</span> <span id="icmd">brew install atifrana/tap/mailbust</span></span>
+        <span><span class="pr">$</span> <span id="icmd">curl -sSL mailbust.com/install.sh | sh</span></span>
         <button class="cpy" onclick="cpy(this)">copy</button>
       </div>
-      <a class="ghost" href="#install">other ways ↓</a>
+      <a class="btn" href="https://github.com/atifrana/mailbust">View on GitHub</a>
     </div>
 
     <div class="termwrap">
       <div class="term" id="term">
         <div class="bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span>
-          <span class="ttl">mailbust - ~/project</span></div>
+          <span class="ttl">mailbust</span></div>
         <div class="scr">
-          <div><span class="prompt">$</span> <span class="typed">mailbust testing</span><span class="caret">▋</span></div>
+          <div><span class="prompt">$</span> <span class="typed">mailbust testing</span><span class="caret">&#9611;</span></div>
           <div class="inbox">
-            <div class="ih"><span>testing@mailbust.com <span class="pub">PUBLIC</span></span><span>⏱ 14:58 left</span></div>
-            <div class="row sel r1"><span class="arr">▸</span><span class="snd">Netflix</span><span class="sj">Verify your email</span><span class="cd">482913</span><span class="t">just now</span></div>
-            <div class="row r2"><span></span><span class="snd">GitHub</span><span class="sj">Confirm your account</span><span class="lk">[link]</span><span class="t">1 min ago</span></div>
-            <div class="row r3"><span></span><span class="snd">Stripe</span><span class="sj">Your one-time passcode</span><span class="cd">550182</span><span class="t">2 min ago</span></div>
-            <div class="row rnew fresh"><span></span><span class="snd">Slack</span><span class="sj">Your confirmation code</span><span class="cd">824193</span><span class="t">just now</span></div>
-            <div class="ihelp">↑↓ move · enter open · c copy code · l copy link · e extend · q quit</div>
+            <div class="ih"><span>testing@mailbust.com <span class="pub">PUBLIC</span></span><span>&#9201; 14:58 left</span></div>
+            <div class="row sel r1"><span class="arr">&#9656;</span><span class="snd">Netflix</span><span class="sj">Verify your email</span><span class="cd">482913</span><span class="tm">just now</span></div>
+            <div class="row r2"><span></span><span class="snd">GitHub</span><span class="sj">Confirm your account</span><span class="lk">[link]</span><span class="tm">1 min ago</span></div>
+            <div class="row r3"><span></span><span class="snd">Stripe</span><span class="sj">Your one-time passcode</span><span class="cd">550182</span><span class="tm">2 min ago</span></div>
+            <div class="row rnew"><span></span><span class="snd">Slack</span><span class="sj">Your confirmation code</span><span class="cd">824193</span><span class="tm">just now</span></div>
+            <div class="keybar"><b>&#8597;</b> navigate &nbsp; <b>&#9166;</b> read email &nbsp; <b>c</b> copy code &nbsp; <b>l</b> copy link &nbsp; <b>a</b> copy address &nbsp; <b>t</b> theme &nbsp; <b>q</b> quit</div>
           </div>
         </div>
       </div>
@@ -167,29 +196,29 @@
   </section>
 
   <section id="features">
-    <div class="eyebrow">Why it's nice</div>
-    <h2>Fast, honest, and out of your way</h2>
+    <div class="eyebrow">What it does</div>
+    <h2>Out of your way, fast</h2>
     <div class="grid3">
-      <div class="card"><div class="ic">⚡</div><h3>Instantly live</h3><p>Mail streams in over WebSocket - no refreshing. The code appears right in the list, so you rarely open an email.</p></div>
-      <div class="card"><div class="ic">🎯</div><h3>Codes extracted</h3><p>It finds the real verification code or magic link and ignores order numbers, prices, dates and years. Backed by 84 tests.</p></div>
-      <div class="card"><div class="ic">🤖</div><h3>Scripts &amp; agents</h3><p><code>--code</code>, <code>--json</code> and real exit codes for CI - plus an MCP server so AI agents can grab codes themselves.</p></div>
+      <div class="card"><div class="ic">&#9889;</div><h3>Live, no refreshing</h3><p>Mail streams in over a WebSocket and lands in the list instantly, with the code shown right in the row.</p></div>
+      <div class="card"><div class="ic">&#127919;</div><h3>Codes pulled out</h3><p>The verification code or login link is detected for you. Order numbers, prices and dates are ignored, backed by 80+ tests.</p></div>
+      <div class="card"><div class="ic">&#129302;</div><h3>Scripts and agents</h3><p><code>--code</code>, <code>--json</code> and real exit codes for CI, plus an MCP server so AI agents can grab codes on their own.</p></div>
     </div>
   </section>
 
-  <section id="ways">
+  <section id="usage">
     <div class="eyebrow">Three ways in</div>
-    <h2>Humans, scripts, and agents</h2>
+    <h2>People, scripts, and agents</h2>
     <div class="ways">
-      <div class="way"><div class="hd">🖥️ Interactive</div><pre><span class="pr">$</span> mailbust
+      <div class="way"><div class="hd">Interactive</div><pre><span class="pr">$</span> mailbust
 <span class="pr">$</span> mailbust testing
 <span class="pr">$</span> mailbust testing <span class="o">-t 1h</span></pre></div>
-      <div class="way"><div class="hd">⚙️ Scripting / CI</div><pre><span class="pr">$</span> mailbust --new <span class="o">--json</span>
+      <div class="way"><div class="hd">Scripting and CI</div><pre><span class="pr">$</span> mailbust --new <span class="o">--json</span>
 <span class="pr">$</span> mailbust box <span class="o">--code</span>
 <span class="pr">$</span> mailbust box <span class="o">--list --json</span></pre></div>
-      <div class="way"><div class="hd">🧠 MCP (agents)</div><pre><span class="pr">$</span> mailbust mcp
+      <div class="way"><div class="hd">MCP for agents</div><pre><span class="pr">$</span> mailbust mcp
 
-<span style="color:var(--faint)"># create_mailbox
-# wait_for_code …</span></pre></div>
+<span class="c"># create_mailbox</span>
+<span class="c"># wait_for_code ...</span></pre></div>
     </div>
   </section>
 
@@ -198,12 +227,12 @@
     <h2>Serverless, on Cloudflare</h2>
     <div class="flow">
       <span class="n">Email in<small>catch-all routing</small></span>
-      <span class="ar">→</span>
-      <span class="n">Worker<small>parse · extract</small></span>
-      <span class="ar">→</span>
-      <span class="n">Durable Object<small>one per mailbox</small></span>
-      <span class="ar">→</span>
-      <span class="n">Auto-delete<small>on expiry</small></span>
+      <span class="ar">&#8594;</span>
+      <span class="n">Worker<small>parse and extract</small></span>
+      <span class="ar">&#8594;</span>
+      <span class="n">Durable Object<small>one per inbox</small></span>
+      <span class="ar">&#8594;</span>
+      <span class="n">Auto-delete<small>when it expires</small></span>
     </div>
   </section>
 
@@ -211,36 +240,43 @@
     <div class="eyebrow">Install</div>
     <h2>One line, any platform</h2>
     <div class="ways">
-      <div class="way"><div class="hd">macOS / Linux</div><pre>curl -sSL mailbust.com/install.sh | sh</pre></div>
+      <div class="way"><div class="hd">macOS and Linux</div><pre>curl -sSL mailbust.com/install.sh | sh</pre></div>
       <div class="way"><div class="hd">Windows</div><pre>irm mailbust.com/install.ps1 | iex</pre></div>
-      <div class="way"><div class="hd">Homebrew / Scoop / Go</div><pre>brew install atifrana/tap/mailbust
-scoop install mailbust
-go install …/mailbust.com/cli@latest</pre></div>
+      <div class="way"><div class="hd">With Go</div><pre>go install \
+  github.com/atifrana/mailbust/cli@latest</pre></div>
     </div>
+    <p style="text-align:center;color:var(--faint);font-size:13.5px;margin-top:18px">
+      Or grab a binary from the <a href="https://github.com/atifrana/mailbust/releases" style="color:var(--dim)">releases page</a>. Homebrew and Scoop are on the way.
+    </p>
   </section>
 
   <footer>
-    <span class="l">© 2026 MailBust · MIT · built on Cloudflare</span>
-    <span>
+    <span class="l">MIT licensed &middot; built on Cloudflare</span>
+    <nav>
       <a href="https://github.com/atifrana/mailbust">GitHub</a>
-      <a href="/privacy">Privacy</a>
-      <a href="/terms">Terms</a>
-    </span>
+      <a href="https://github.com/atifrana/mailbust/blob/main/docs/privacy.md">Privacy</a>
+      <a href="https://github.com/atifrana/mailbust/blob/main/docs/terms.md">Terms</a>
+    </nav>
   </footer>
 </div>
 
 <script>
   function cpy(btn){
     var t=document.getElementById('icmd').textContent;
-    (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(
-      function(){btn.textContent='copied';setTimeout(function(){btn.textContent='copy'},1400)},
-      function(){btn.textContent='copy'}
-    );
+    var done=function(){btn.textContent='copied';setTimeout(function(){btn.textContent='copy'},1400)};
+    if(navigator.clipboard){navigator.clipboard.writeText(t).then(done,function(){})}else{done()}
   }
-  // play the terminal animation once it scrolls into view
+  var root=document.documentElement;
+  document.querySelectorAll('.sw').forEach(function(b){
+    b.addEventListener('click',function(){
+      root.style.setProperty('--accent',b.dataset.accent);
+      root.style.setProperty('--accent-dim',b.dataset.dim);
+      document.querySelectorAll('.sw').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});
+    });
+  });
   var term=document.getElementById('term');
   var io=new IntersectionObserver(function(es){
-    es.forEach(function(e){ if(e.isIntersecting){ term.classList.add('play'); io.disconnect(); }});
+    es.forEach(function(e){if(e.isIntersecting){term.classList.add('play');io.disconnect()}});
   },{threshold:.4});
   io.observe(term);
 </script>
